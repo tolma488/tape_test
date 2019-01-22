@@ -7,15 +7,6 @@ void initdrive(char* drivename, int blocksize);
 
 HANDLE handle;
 
-void geterror()
-{
-	DWORD err = GetLastError();
-	printf("err in hex: %#010x \n", err);
-	char buf[256];
-	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), buf, 256, NULL);
-	printf("%s\n", buf);
-}
-
 int main(int argc, char** argv)
 {
 	if (argc != 5) {
@@ -35,6 +26,15 @@ int main(int argc, char** argv)
 	taperewind_test(blocksize, start_offset, stop_offset);
 	CloseHandle(handle);
 	return 0;
+}
+
+void geterror()
+{
+	DWORD err = GetLastError();
+	printf("err in hex: %#010x \n", err);
+	char buf[256];
+	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), buf, 256, NULL);
+	printf("%s\n", buf);
 }
 
 void initdrive(char* drivename, int blocksize)
@@ -63,7 +63,7 @@ void taperewind_test(int blocksize, uint64_t start_offset, uint64_t stop_offset)
 		dwOffsetLow = start_offset & 0xffffffff;
 		dwOffsetHigh = start_offset >> 32;
 		printf("Rewinding to %I64d.\n", start_offset);
-		res = SetTapePosition(handle, TAPE_LOGICAL_BLOCK, 0, dwOffsetLow, dwOffsetHigh, FALSE);
+		res = SetTapePosition(handle, TAPE_LOGICAL_BLOCK, 0, dwOffsetLow, dwOffsetHigh, FALSE);		//going to the start position
 		if (NO_ERROR != res) {
 			printf("Tape positioning error.\n");
 			geterror();
@@ -74,7 +74,7 @@ void taperewind_test(int blocksize, uint64_t start_offset, uint64_t stop_offset)
 	dwOffsetLow = stop_offset & 0xffffffff;
 	dwOffsetHigh = stop_offset >> 32;
 	printf("Rewinding %I64d blocks to %I64d.\n", stop_offset, (start_offset+stop_offset));
-	res = SetTapePosition(handle, TAPE_SPACE_RELATIVE_BLOCKS, 0, dwOffsetLow, dwOffsetHigh, FALSE);
+	res = SetTapePosition(handle, TAPE_SPACE_RELATIVE_BLOCKS, 0, dwOffsetLow, dwOffsetHigh, FALSE);	//rewinding to the second position
 	if (NO_ERROR != res) {
 		printf("Tape positioning error.\n");
 		geterror();
