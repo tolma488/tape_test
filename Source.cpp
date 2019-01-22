@@ -19,8 +19,8 @@ void geterror()
 int main(int argc, char** argv)
 {
 	if (argc != 5) {
-		printf("Error: specify drive name, block-size, start- and the stop-offset on tape. Also make sure that medium is loaded to drive.\n");
-		printf("Example: tapetest.exe \"\\\\.\\Tape0\" 262144 107374182400 107374182800\n");
+		printf("Error: specify drive name, block-size, start offset and the number of blocks to rewind.\nAlso make sure that medium is loaded to drive.\n");
+		printf("Example: tape_rewind.exe \"\\\\.\\Tape0\" 262144 107374182400 200\n");
 		return -1;
 	}
 
@@ -32,7 +32,6 @@ int main(int argc, char** argv)
 	printf("Input parameters: %s %d %I64d %I64d\n", drivename, blocksize, start_offset, stop_offset);
 	initdrive(drivename, blocksize);
 
-	printf("Rewinding the tape...\n");
 	taperewind_test(blocksize, start_offset, stop_offset);
 	CloseHandle(handle);
 	return 0;
@@ -74,8 +73,8 @@ void taperewind_test(int blocksize, uint64_t start_offset, uint64_t stop_offset)
 	}
 	dwOffsetLow = stop_offset & 0xffffffff;
 	dwOffsetHigh = stop_offset >> 32;
-	printf("Rewinding to %I64d.\n", stop_offset);
-	res = SetTapePosition(handle, TAPE_ABSOLUTE_BLOCK, 0, dwOffsetLow, dwOffsetHigh, FALSE);
+	printf("Rewinding %I64d blocks to %I64d.\n", stop_offset, (start_offset+stop_offset));
+	res = SetTapePosition(handle, TAPE_SPACE_RELATIVE_BLOCKS, 0, dwOffsetLow, dwOffsetHigh, FALSE);
 	if (NO_ERROR != res) {
 		printf("Tape positioning error.\n");
 		geterror();
